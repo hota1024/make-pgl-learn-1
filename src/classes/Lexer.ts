@@ -1,6 +1,5 @@
-import { ILexer } from '../interfaces'
-import { Token, SymbolToken } from '../types'
-import { TokenMaker } from './TokenMaker'
+import { ILexer, ILocation } from '../interfaces'
+import { Token, SymbolToken, NumberToken } from '../types'
 import { Location } from './Location'
 
 /*
@@ -8,7 +7,6 @@ import { Location } from './Location'
  */
 export class Lexer implements ILexer {
   analyze(source: string): Token[] {
-    const tokenMaker = new TokenMaker()
     const tokens: Token[] = []
     let pos = 0
 
@@ -21,7 +19,7 @@ export class Lexer implements ILexer {
         }
 
         tokens.push(
-          tokenMaker.number(
+          this.makeNumber(
             Number(source.slice(start, pos)),
             new Location(start, pos - 1)
           )
@@ -43,7 +41,7 @@ export class Lexer implements ILexer {
           symbol = 'right_parenthesis'
         }
 
-        tokens.push(tokenMaker.symbol(symbol, new Location(pos, pos)))
+        tokens.push(this.makeSymbol(symbol, new Location(pos, pos)))
         ++pos
       } else if (source[pos] === ' ') {
         while (source[pos] === ' ') {
@@ -53,5 +51,33 @@ export class Lexer implements ILexer {
     }
 
     return tokens
+  }
+
+  /**
+   * Make a NumberToken.
+   *
+   * @param value Value.
+   * @param location Token location.
+   */
+  makeNumber(value: number, location: ILocation): NumberToken {
+    return {
+      type: 'number',
+      value,
+      location,
+    }
+  }
+
+  /**
+   * Make a SymbolToken.
+   *
+   * @param symbol Symbol type.
+   * @param location Token location.
+   */
+  makeSymbol(symbol: SymbolToken['symbol'], location: ILocation): SymbolToken {
+    return {
+      type: 'symbol',
+      symbol,
+      location,
+    }
   }
 }
