@@ -211,14 +211,3 @@ export class Parser implements IParser {
     }
   }
 }
-
-console.clear()
-const input = '1 * (2 + 3)'
-const tokens = new Lexer().analyze(input)
-const parser = new Parser()
-console.log('==========Parse===========')
-const ast = parser.parse(tokens)
-
-console.log(`\n==========Result==========\ninput: ${input}`)
-// console.log('tokens: ', tokens)
-console.log('ast: ', ast)
