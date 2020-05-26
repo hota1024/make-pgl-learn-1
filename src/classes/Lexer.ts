@@ -21,7 +21,7 @@ export class Lexer implements ILexer {
         tokens.push(
           this.makeNumber(
             Number(source.slice(start, pos)),
-            new Location(start, pos - 1)
+            new Location(start, pos)
           )
         )
       } else if ('+-*/()'.includes(source[pos])) {
@@ -41,7 +41,7 @@ export class Lexer implements ILexer {
           symbol = 'right_parenthesis'
         }
 
-        tokens.push(this.makeSymbol(symbol, new Location(pos, pos)))
+        tokens.push(this.makeSymbol(symbol, new Location(pos, pos + 1)))
         ++pos
       } else if (source[pos] === ' ') {
         while (source[pos] === ' ') {
