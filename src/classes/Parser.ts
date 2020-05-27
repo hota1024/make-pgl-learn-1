@@ -9,6 +9,8 @@ import {
   BinaryOperatorType,
 } from '../types'
 import { Walker } from './Walker'
+import { ParseError } from './ParseError'
+import { Location } from './Location'
 
 /*
  * TokenWalker type.
@@ -126,7 +128,14 @@ export class Parser implements IParser {
         return this.parseAtom(tokens)
       }
     } else {
-      throw new Error('Parse expression1 error.')
+      console.log(peekToken, tokens.current())
+      throw new ParseError(
+        'peek error',
+        new Location(
+          tokens.current().location.start + 1,
+          tokens.current().location.end + 1
+        )
+      )
     }
   }
 
@@ -140,12 +149,13 @@ export class Parser implements IParser {
 
       const nextToken = tokens.next()
       if (
+        nextToken &&
         nextToken.type === 'symbol' &&
         nextToken.symbol === 'right_parenthesis'
       ) {
         return expression
       } else {
-        throw new Error('Unclosed open parenthesis.')
+        throw new ParseError('missing ) in parenthetical.', token.location)
       }
     }
   }
