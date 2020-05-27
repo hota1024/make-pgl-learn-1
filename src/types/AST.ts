@@ -81,6 +81,40 @@ export type BinaryOperatorNode = ASTBase & {
 }
 
 /*
+ * Identifier AST node.
+ */
+export type IdentifierNode = ASTBase & {
+  type: 'identifier'
+
+  /**
+   * Identifier string.
+   */
+  identifier: string
+}
+
+/*
+ * Call AST node.
+ */
+export type CallNode = ASTBase & {
+  type: 'call'
+
+  /**
+   * Identifier string.
+   */
+  identifier: string
+
+  /**
+   * Argument nodes.
+   */
+  args: AST[]
+}
+
+/*
  * AST type.
  */
-export type AST = NumberNode | UnaryOperatorNode | BinaryOperatorNode
+export type AST =
+  | NumberNode
+  | UnaryOperatorNode
+  | BinaryOperatorNode
+  | IdentifierNode
+  | CallNode
