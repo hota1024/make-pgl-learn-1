@@ -12,10 +12,21 @@ export class Lexer implements ILexer {
     let pos = 0
 
     while (pos < source.length) {
-      if (/[0-9]/.test(source[pos])) {
+      if (/[0-9]|\./.test(source[pos])) {
         const start = pos
+        let useDecimal = false
 
-        while (pos < source.length && /[0-9]/.test(source[pos])) {
+        while (pos < source.length && /[0-9]|\./.test(source[pos])) {
+          if (source[pos] === '.') {
+            if (useDecimal) {
+              throw new LexerError(
+                `decimal point is already used`,
+                new Location(pos, pos + 1)
+              )
+            } else {
+              useDecimal = true
+            }
+          }
           ++pos
         }
 
