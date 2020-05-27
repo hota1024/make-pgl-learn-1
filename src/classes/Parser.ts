@@ -9,7 +9,6 @@ import {
   BinaryOperatorType,
 } from '../types'
 import { Walker } from './Walker'
-import { Lexer } from './Lexer'
 
 /*
  * TokenWalker type.
@@ -58,7 +57,6 @@ export class Parser implements IParser {
           peekToken.symbol === 'plus' ? 'addition' : 'subtraction'
 
         const right = this.parseExpression2(tokens)
-        console.log(`${operator}`, right)
 
         expression = this.makeBinaryOperator(
           operator,
@@ -95,7 +93,6 @@ export class Parser implements IParser {
           peekToken.symbol === 'asterisk' ? 'multiplication' : 'division'
 
         const right = this.parseExpression1(tokens)
-        console.log(`${operator}`, right)
         expression = this.makeBinaryOperator(
           operator,
           expression,
@@ -135,7 +132,6 @@ export class Parser implements IParser {
 
   private parseAtom(tokens: TokenWalker) {
     const token = tokens.next()
-    console.log('atom:', token)
 
     if (token.type === 'number') {
       return this.makeNumber(token.value, token.location)
