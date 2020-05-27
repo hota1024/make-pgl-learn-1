@@ -1,6 +1,13 @@
 import * as readline from 'readline'
-import { Lexer, Parser, Evaluator, LexerError, ParseError } from './classes'
-import { Token } from './types'
+import {
+  Lexer,
+  Parser,
+  Evaluator,
+  LexerError,
+  ParseError,
+  EvaluatorReferenceError,
+} from './classes'
+import { Token, AST } from './types'
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -49,6 +56,25 @@ const parseOrFalse = (formula: string, tokens: Token[]) => {
   }
 }
 
+const evaluateOrFalse = (formula: string, ast: AST) => {
+  try {
+    return evaluator.evaluate(ast)
+  } catch (error) {
+    if (error instanceof EvaluatorReferenceError) {
+      const location = error.location
+      console.log(formula)
+      console.log(
+        ' '.repeat(location.start) +
+          '^'.repeat(location.end - location.start) +
+          `← error: ${error.message}`
+      )
+      return false
+    }
+
+    throw error
+  }
+}
+
 const input = () =>
   rl.question('-> ', (line) => {
     if (line === '.exit') {
@@ -61,9 +87,11 @@ const input = () =>
       const ast = parseOrFalse(line, tokens)
 
       if (ast !== false) {
-        const result = evaluator.evaluate(ast)
+        const result = evaluateOrFalse(line, ast)
 
-        console.log(`<- ${result}`)
+        if (result !== false) {
+          console.log(`<- ${result}`)
+        }
       }
     }
 
