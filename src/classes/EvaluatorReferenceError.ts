@@ -1,18 +1,8 @@
-import { ILocation } from '../interfaces'
+import { EvaluatorError } from './EvaluatorError'
 
 /*
  * EvaluatorReferenceError class.
  */
-export class EvaluatorReferenceError extends Error {
+export class EvaluatorReferenceError extends EvaluatorError {
   name = 'EvaluatorReferenceError'
-
-  /**
-   * Location.
-   */
-  location: ILocation
-
-  constructor(message: string, location: ILocation) {
-    super(message)
-    this.location = location
-  }
 }
