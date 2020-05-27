@@ -1,6 +1,7 @@
 import { ILexer, ILocation } from '../interfaces'
 import { Token, SymbolToken, NumberToken } from '../types'
 import { Location } from './Location'
+import { LexerError } from './LexerError'
 
 /*
  * Lexer class.
@@ -47,6 +48,8 @@ export class Lexer implements ILexer {
         while (source[pos] === ' ') {
           ++pos
         }
+      } else {
+        throw new LexerError('illegal character', new Location(pos, pos + 1))
       }
     }
 
