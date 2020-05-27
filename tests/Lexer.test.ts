@@ -32,4 +32,49 @@ describe('Lexer class test', () => {
     expect(tokens[5].type === 'number' && tokens[5].value).toBe(2)
     expect(tokens[5].location).toEqual({ start: 9, end: 10 })
   })
+
+  test('should analyze identifiers', () => {
+    const lexer = new Lexer()
+    const source = 'hoge fuga hota1024'
+    const tokens = lexer.analyze(source)
+
+    expect(tokens[0].type).toBe('identifier')
+    expect(tokens[0].type === 'identifier' && tokens[0].identifier).toBe('hoge')
+
+    expect(tokens[1].type).toBe('identifier')
+    expect(tokens[1].type === 'identifier' && tokens[1].identifier).toBe('fuga')
+
+    expect(tokens[2].type).toBe('identifier')
+    expect(tokens[2].type === 'identifier' && tokens[2].identifier).toBe(
+      'hota1024'
+    )
+  })
+
+  test('should analyze function call', () => {
+    const lexer = new Lexer()
+    const source = 'pow(2, 3)' // 2^3
+    const tokens = lexer.analyze(source)
+
+    expect(tokens[0].type).toBe('identifier')
+    expect(tokens[0].type === 'identifier' && tokens[0].identifier).toBe('pow')
+
+    expect(tokens[1].type).toBe('symbol')
+    expect(tokens[1].type === 'symbol' && tokens[1].symbol).toBe(
+      'left_parenthesis'
+    )
+
+    expect(tokens[2].type).toBe('number')
+    expect(tokens[2].type === 'number' && tokens[2].value).toBe(2)
+
+    expect(tokens[3].type).toBe('symbol')
+    expect(tokens[3].type === 'symbol' && tokens[3].symbol).toBe('comma')
+
+    expect(tokens[4].type).toBe('number')
+    expect(tokens[4].type === 'number' && tokens[4].value).toBe(3)
+
+    expect(tokens[5].type).toBe('symbol')
+    expect(tokens[5].type === 'symbol' && tokens[5].symbol).toBe(
+      'right_parenthesis'
+    )
+  })
 })
