@@ -1,5 +1,5 @@
 import { ILexer, ILocation } from '../interfaces'
-import { Token, SymbolToken, NumberToken } from '../types'
+import { Token, SymbolToken, NumberToken, IdentifierToken } from '../types'
 import { Location } from './Location'
 import { LexerError } from './LexerError'
 
@@ -25,7 +25,20 @@ export class Lexer implements ILexer {
             new Location(start, pos)
           )
         )
-      } else if ('+-*/()'.includes(source[pos])) {
+      } else if (/[a-zA-Z]/.test(source[pos])) {
+        const start = pos
+
+        while (pos < source.length && /[a-zA-Z0-9]/.test(source[pos])) {
+          ++pos
+        }
+
+        tokens.push(
+          this.makeIdentifier(
+            source.slice(start, pos),
+            new Location(start, pos)
+          )
+        )
+      } else if ('+-*/(),'.includes(source[pos])) {
         let symbol: SymbolToken['symbol']
 
         if (source[pos] === '+') {
@@ -40,6 +53,8 @@ export class Lexer implements ILexer {
           symbol = 'left_parenthesis'
         } else if (source[pos] === ')') {
           symbol = 'right_parenthesis'
+        } else if (source[pos] === ',') {
+          symbol = 'comma'
         }
 
         tokens.push(this.makeSymbol(symbol, new Location(pos, pos + 1)))
@@ -62,7 +77,7 @@ export class Lexer implements ILexer {
    * @param value Value.
    * @param location Token location.
    */
-  makeNumber(value: number, location: ILocation): NumberToken {
+  private makeNumber(value: number, location: ILocation): NumberToken {
     return {
       type: 'number',
       value,
@@ -76,10 +91,30 @@ export class Lexer implements ILexer {
    * @param symbol Symbol type.
    * @param location Token location.
    */
-  makeSymbol(symbol: SymbolToken['symbol'], location: ILocation): SymbolToken {
+  private makeSymbol(
+    symbol: SymbolToken['symbol'],
+    location: ILocation
+  ): SymbolToken {
     return {
       type: 'symbol',
       symbol,
+      location,
+    }
+  }
+
+  /**
+   * Make a IdentifierToken.
+   *
+   * @param identifier Identifier string.
+   * @param location Token location.
+   */
+  private makeIdentifier(
+    identifier: string,
+    location: ILocation
+  ): IdentifierToken {
+    return {
+      type: 'identifier',
+      identifier,
       location,
     }
   }
