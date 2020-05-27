@@ -4,6 +4,9 @@
   "main": "lib/index.js",
   "author": "hota1024",
   "license": "MIT",
+  "scripts": {
+    "interpreter": "ts-node src/interpreter"
+  },
   "devDependencies": {
     "@types/jest": "^25.2.3",
     "@typescript-eslint/eslint-plugin": "^3.0.0",
