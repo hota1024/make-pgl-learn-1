@@ -148,34 +148,35 @@ export class Parser implements IParser {
     } else if (token.type === 'identifier') {
       const identifierToken = token
 
-      const nextToken = tokens.next()
+      const peekToken = tokens.peek()
 
       if (
-        nextToken &&
-        nextToken.type === 'symbol' &&
-        nextToken.symbol === 'left_parenthesis'
+        peekToken &&
+        peekToken.type === 'symbol' &&
+        peekToken.symbol === 'left_parenthesis'
       ) {
         const args: AST[] = []
+        tokens.next()
 
         while (true as const) {
-          const closeOrCommaToken = tokens.peek()
+          const token = tokens.peek()
 
-          if (!closeOrCommaToken) {
+          if (!token) {
             throw new ParseError('peek error', tokens.current().location)
-          } else if (closeOrCommaToken.type === 'symbol') {
-            if (closeOrCommaToken.symbol === 'right_parenthesis') {
+          } else if (token.type === 'symbol') {
+            if (token.symbol === 'right_parenthesis') {
               tokens.next()
               return this.makeCall(
                 identifierToken.identifier,
                 args,
-                identifierToken.location.merge(closeOrCommaToken.location)
+                identifierToken.location.merge(token.location)
               )
-            } else if (closeOrCommaToken.symbol === 'comma') {
+            } else if (token.symbol === 'comma') {
               tokens.next()
             } else {
               throw new ParseError(
-                `invalid character: ${closeOrCommaToken.symbol}`,
-                closeOrCommaToken.location
+                `invalid character: ${token.symbol}`,
+                token.location
               )
             }
           }
