@@ -7,6 +7,8 @@ import {
   UnaryOperatorNode,
   BinaryOperatorNode,
   BinaryOperatorType,
+  CallNode,
+  IdentifierNode,
 } from '../types'
 import { Walker } from './Walker'
 import { ParseError } from './ParseError'
@@ -128,7 +130,6 @@ export class Parser implements IParser {
         return this.parseAtom(tokens)
       }
     } else {
-      console.log(peekToken, tokens.current())
       throw new ParseError(
         'peek error',
         new Location(
@@ -144,6 +145,52 @@ export class Parser implements IParser {
 
     if (token.type === 'number') {
       return this.makeNumber(token.value, token.location)
+    } else if (token.type === 'identifier') {
+      const identifierToken = token
+
+      const nextToken = tokens.next()
+
+      if (
+        nextToken &&
+        nextToken.type === 'symbol' &&
+        nextToken.symbol === 'left_parenthesis'
+      ) {
+        const args: AST[] = []
+
+        while (true as const) {
+          const closeOrCommaToken = tokens.peek()
+
+          if (!closeOrCommaToken) {
+            throw new ParseError('peek error', tokens.current().location)
+          } else if (closeOrCommaToken.type === 'symbol') {
+            if (closeOrCommaToken.symbol === 'right_parenthesis') {
+              tokens.next()
+              return this.makeCall(
+                identifierToken.identifier,
+                args,
+                identifierToken.location.merge(closeOrCommaToken.location)
+              )
+            } else if (closeOrCommaToken.symbol === 'comma') {
+              tokens.next()
+            } else {
+              throw new ParseError(
+                `invalid character: ${closeOrCommaToken.symbol}`,
+                closeOrCommaToken.location
+              )
+            }
+          }
+
+          const arg = this.parseExpression(tokens)
+          if (arg) {
+            args.push(arg)
+          }
+        }
+      } else {
+        return this.makeIdentifier(
+          identifierToken.identifier,
+          identifierToken.location
+        )
+      }
     } else if (token.type === 'symbol' && token.symbol === 'left_parenthesis') {
       const expression = this.parseExpression(tokens)
 
@@ -213,6 +260,43 @@ export class Parser implements IParser {
       operator,
       left,
       right,
+      location,
+    }
+  }
+
+  /**
+   * Make a IdentifierNode.
+   *
+   * @param identifier Identifier string.
+   * @param location Node location.
+   */
+  private makeIdentifier(
+    identifier: string,
+    location: ILocation
+  ): IdentifierNode {
+    return {
+      type: 'identifier',
+      identifier,
+      location,
+    }
+  }
+
+  /**
+   * Make a CallNode.
+   *
+   * @param identifier Identifier string.
+   * @param args Argument AST nodes.
+   * @param location Node location.
+   */
+  private makeCall(
+    identifier: string,
+    args: AST[],
+    location: ILocation
+  ): CallNode {
+    return {
+      type: 'call',
+      identifier,
+      args,
       location,
     }
   }
