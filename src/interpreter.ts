@@ -13,6 +13,7 @@ const evaluator = new Evaluator()
 const input = () =>
   rl.question('-> ', (line) => {
     if (line === '.exit') {
+      rl.close()
       return
     }
 
