@@ -43,9 +43,22 @@ export type SymbolToken = TokenBase & {
     | 'slash'
     | 'left_parenthesis'
     | 'right_parenthesis'
+    | 'comma'
+}
+
+/*
+ * IdentifierToken type.
+ */
+export type IdentifierToken = TokenBase & {
+  type: 'identifier'
+
+  /**
+   * Identifier string.
+   */
+  identifier: string
 }
 
 /*
  * Token type.
  */
-export type Token = NumberToken | SymbolToken
+export type Token = NumberToken | SymbolToken | IdentifierToken
