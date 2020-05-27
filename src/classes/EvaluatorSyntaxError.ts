@@ -1,8 +1,8 @@
 import { EvaluatorError } from './EvaluatorError'
 
 /*
- * EvaluatorReferenceError class.
+ * EvaluatorSyntaxError class.
  */
-export class EvaluatorReferenceError extends EvaluatorError {
-  name = 'EvaluatorReferenceError'
+export class EvaluatorSyntaxError extends EvaluatorError {
+  name = 'EvaluatorSyntaxError'
 }
