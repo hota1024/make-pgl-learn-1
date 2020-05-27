@@ -82,15 +82,34 @@ const input = () =>
       return
     }
 
-    const tokens = analyzeOrFalse(line)
-    if (tokens !== false) {
-      const ast = parseOrFalse(line, tokens)
+    if (line.match(/^@ ?/)) {
+      line = line.match(/^@ ?(.*)/)[1]
 
-      if (ast !== false) {
-        const result = evaluateOrFalse(line, ast)
+      const tokens = analyzeOrFalse(line)
+      if (tokens !== false) {
+        console.log('Tokens:', tokens)
+        const ast = parseOrFalse(line, tokens)
 
-        if (result !== false) {
-          console.log(`<- ${result}`)
+        if (ast !== false) {
+          console.log('AST:', ast)
+          const result = evaluateOrFalse(line, ast)
+
+          if (result !== false) {
+            console.log(`<- ${result}`)
+          }
+        }
+      }
+    } else {
+      const tokens = analyzeOrFalse(line)
+      if (tokens !== false) {
+        const ast = parseOrFalse(line, tokens)
+
+        if (ast !== false) {
+          const result = evaluateOrFalse(line, ast)
+
+          if (result !== false) {
+            console.log(`<- ${result}`)
+          }
         }
       }
     }
