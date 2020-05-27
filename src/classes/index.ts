@@ -1,5 +1,6 @@
 export * from './Evaluator'
 export * from './Lexer'
+export * from './LexerError'
 export * from './Location'
 export * from './Parser'
 export * from './Walker'
