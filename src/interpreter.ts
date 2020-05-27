@@ -1,5 +1,6 @@
 import * as readline from 'readline'
-import { Lexer, Parser, Evaluator } from './classes'
+import { Lexer, Parser, Evaluator, LexerError, ParseError } from './classes'
+import { Token } from './types'
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -10,6 +11,44 @@ const lexer = new Lexer()
 const parser = new Parser()
 const evaluator = new Evaluator()
 
+const analyzeOrFalse = (formula: string) => {
+  try {
+    return lexer.analyze(formula)
+  } catch (error) {
+    if (error instanceof LexerError) {
+      const location = error.location
+      console.log(formula)
+      console.log(
+        ' '.repeat(location.start) +
+          '^'.repeat(location.end - location.start) +
+          `← error: ${error.message}`
+      )
+      return false
+    }
+
+    throw error
+  }
+}
+
+const parseOrFalse = (formula: string, tokens: Token[]) => {
+  try {
+    return parser.parse(tokens)
+  } catch (error) {
+    if (error instanceof ParseError) {
+      const location = error.location
+      console.log(formula)
+      console.log(
+        ' '.repeat(location.start) +
+          '^'.repeat(location.end - location.start) +
+          `← error: ${error.message}`
+      )
+      return false
+    }
+
+    throw error
+  }
+}
+
 const input = () =>
   rl.question('-> ', (line) => {
     if (line === '.exit') {
@@ -17,11 +56,16 @@ const input = () =>
       return
     }
 
-    const tokens = lexer.analyze(line)
-    const ast = parser.parse(tokens)
-    const result = evaluator.evaluate(ast)
+    const tokens = analyzeOrFalse(line)
+    if (tokens !== false) {
+      const ast = parseOrFalse(line, tokens)
 
-    console.log(`<- ${result}`)
+      if (ast !== false) {
+        const result = evaluator.evaluate(ast)
+
+        console.log(`<- ${result}`)
+      }
+    }
 
     input()
   })
