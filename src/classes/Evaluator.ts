@@ -1,6 +1,8 @@
 import { IEvaluator } from '../interfaces'
 import { AST } from '../types'
 import { EvaluatorReferenceError } from '.'
+import { EvaluatorSyntaxError } from './EvaluatorSyntaxError'
+import { EvaluatorTypeError } from './EvaluatorTypeError'
 
 /*
  * Evaluator class.
@@ -18,7 +20,14 @@ export class Evaluator implements IEvaluator {
     PI: Math.PI,
     SQRT1_2: Math.SQRT1_2,
     SQRT2: Math.SQRT2,
+    true: 1,
+    false: 0,
   }
+
+  /**
+   * Variables.
+   */
+  readonly variables = {}
 
   /**
    * Functions.
@@ -72,24 +81,109 @@ export class Evaluator implements IEvaluator {
    */
   private evaluateAST(ast: AST): number {
     if (ast.type === 'binary_operator') {
-      let calculator: (a, b) => number
+      if (ast.operator === 'equal') {
+        if (ast.left.type === 'identifier') {
+          if (typeof this.constants[ast.left.identifier] !== 'undefined') {
+            throw new EvaluatorTypeError(
+              'invalid asssignment to constant',
+              ast.left.location
+            )
+          }
 
-      if (ast.operator === 'addition') {
-        calculator = (a, b) => a + b
-      } else if (ast.operator === 'subtraction') {
-        calculator = (a, b) => a - b
-      } else if (ast.operator === 'multiplication') {
-        calculator = (a, b) => a * b
-      } else if (ast.operator === 'division') {
-        calculator = (a, b) => a / b
+          return (this.variables[ast.left.identifier] = this.evaluateAST(
+            ast.right
+          ))
+        } else {
+          throw new EvaluatorSyntaxError(
+            'expected expression',
+            ast.left.location
+          )
+        }
+      } else if (
+        ast.operator === 'addition_equal' ||
+        ast.operator === 'subtraction_equal' ||
+        ast.operator === 'multiplication_equal' ||
+        ast.operator === 'division_equal' ||
+        ast.operator === 'percent_equal'
+      ) {
+        if (ast.left.type === 'identifier') {
+          if (typeof this.constants[ast.left.identifier] !== 'undefined') {
+            throw new EvaluatorTypeError(
+              'invalid asssignment to constant',
+              ast.left.location
+            )
+          }
+
+          if (typeof this.variables[ast.left.identifier] === 'undefined') {
+            throw new EvaluatorReferenceError(
+              `${ast.left.identifier} is not defined`,
+              ast.left.location
+            )
+          }
+
+          let calculator: (a, b) => number
+
+          if (ast.operator === 'addition_equal') {
+            calculator = (a, b) => a + b
+          } else if (ast.operator === 'subtraction_equal') {
+            calculator = (a, b) => a - b
+          } else if (ast.operator === 'multiplication_equal') {
+            calculator = (a, b) => a * b
+          } else if (ast.operator === 'division_equal') {
+            calculator = (a, b) => a / b
+          } else if (ast.operator === 'percent_equal') {
+            calculator = (a, b) => a % b
+          }
+
+          return (this.variables[ast.left.identifier] = calculator(
+            this.variables[ast.left.identifier],
+            this.evaluateAST(ast.right)
+          ))
+        } else {
+          throw new EvaluatorSyntaxError(
+            'expected expression',
+            ast.left.location
+          )
+        }
+      } else {
+        let calculator: (a, b) => number
+
+        if (ast.operator === 'addition') {
+          calculator = (a, b) => a + b
+        } else if (ast.operator === 'subtraction') {
+          calculator = (a, b) => a - b
+        } else if (ast.operator === 'multiplication') {
+          calculator = (a, b) => a * b
+        } else if (ast.operator === 'division') {
+          calculator = (a, b) => a / b
+        } else if (ast.operator === 'percent') {
+          calculator = (a, b) => a % b
+        } else if (ast.operator === 'equal_equal') {
+          calculator = (a, b) => (a == b ? 1 : 0)
+        } else if (ast.operator === 'exclamation_equal') {
+          calculator = (a, b) => (a != b ? 1 : 0)
+        } else if (ast.operator === 'less_than') {
+          calculator = (a, b) => (a < b ? 1 : 0)
+        } else if (ast.operator === 'less_equal_than') {
+          calculator = (a, b) => (a <= b ? 1 : 0)
+        } else if (ast.operator === 'greeter_than') {
+          calculator = (a, b) => (a > b ? 1 : 0)
+        } else if (ast.operator === 'greeter_equal_than') {
+          calculator = (a, b) => (a >= b ? 1 : 0)
+        }
+
+        return calculator(
+          this.evaluateAST(ast.left),
+          this.evaluateAST(ast.right)
+        )
       }
-
-      return calculator(this.evaluateAST(ast.left), this.evaluateAST(ast.right))
     } else if (ast.type === 'unary_operator') {
       if (ast.operator === 'minus') {
         return this.evaluateAST(ast.node) * -1
       } else if (ast.operator === 'plus') {
         return this.evaluateAST(ast.node)
+      } else if (ast.operator === 'exclamation') {
+        return this.evaluateAST(ast.node) ? 0 : 1
       }
     } else if (ast.type === 'number') {
       return ast.value
@@ -105,9 +199,10 @@ export class Evaluator implements IEvaluator {
         return func(...ast.args.map((arg) => this.evaluateAST(arg)))
       }
     } else if (ast.type === 'identifier') {
-      const value = this.constants[ast.identifier]
+      const value =
+        this.constants[ast.identifier] ?? this.variables[ast.identifier]
 
-      if (!value) {
+      if (typeof value === 'undefined') {
         throw new EvaluatorReferenceError(
           `${ast.identifier} is not defined.`,
           ast.location
