@@ -30,7 +30,7 @@ export type NumberNode = ASTBase & {
 /*
  * UnaryOperatorType.
  */
-export type UnaryOperatorType = 'minus' | 'plus'
+export type UnaryOperatorType = 'minus' | 'plus' | 'exclamation'
 
 /*
  * UnaryOperator AST node.
@@ -57,6 +57,20 @@ export type BinaryOperatorType =
   | 'subtraction'
   | 'multiplication'
   | 'division'
+  | 'percent'
+  | 'equal'
+  | 'addition_equal'
+  | 'subtraction_equal'
+  | 'multiplication_equal'
+  | 'division_equal'
+  | 'percent_equal'
+  | 'equal_equal'
+  | 'equal_equal'
+  | 'exclamation_equal'
+  | 'less_than'
+  | 'less_equal_than'
+  | 'greeter_than'
+  | 'greeter_equal_than'
 
 /*
  * BinaryOperator AST node.
