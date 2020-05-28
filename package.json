@@ -1,5 +1,8 @@
 {
-  "name": "make-pgl-learn-1",
+  "name": "mpl-1",
+  "bin": {
+    "interpreter": "ts-node src/interpreter"
+  },
   "version": "0.0.0",
   "main": "lib/index.js",
   "author": "hota1024",
