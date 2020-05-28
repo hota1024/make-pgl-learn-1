@@ -5,7 +5,6 @@ import {
   Evaluator,
   LexerError,
   ParseError,
-  EvaluatorReferenceError,
   EvaluatorError,
 } from './classes'
 import { Token, AST } from './types'
