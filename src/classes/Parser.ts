@@ -35,11 +35,147 @@ export class Parser implements IParser {
    * @param tokens Tokens iterator.
    */
   private parseExpression(tokens: TokenWalker): AST {
-    return this.parseExpression3(tokens)
+    return this.parseExpression5(tokens)
   }
 
   /**
-   * Parse expression(`a+b` and `a-b`).
+   * Parse expression(`a=b`, `a+=b`, `a-=b`, `a*=b`, `a/=b`, `a%=b`).
+   *
+   * @param tokens Tokens.
+   */
+  private parseExpression5(tokens: TokenWalker) {
+    let expression = this.parseExpression4(tokens)
+
+    while (true as const) {
+      const peekToken = tokens.peek()
+
+      if (!peekToken) {
+        return expression
+      }
+
+      if (peekToken.type === 'symbol' && peekToken.symbol === 'equal') {
+        tokens.next()
+        const right = this.parseExpression5(tokens)
+
+        expression = this.makeBinaryOperator(
+          'equal',
+          expression,
+          right,
+          expression.location.merge(right.location)
+        )
+      } else if (
+        peekToken.type === 'symbol' &&
+        peekToken.symbol === 'plus_equal'
+      ) {
+        tokens.next()
+        const right = this.parseExpression5(tokens)
+
+        expression = this.makeBinaryOperator(
+          'addition_equal',
+          expression,
+          right,
+          expression.location.merge(right.location)
+        )
+      } else if (
+        peekToken.type === 'symbol' &&
+        peekToken.symbol === 'minus_equal'
+      ) {
+        tokens.next()
+        const right = this.parseExpression5(tokens)
+
+        expression = this.makeBinaryOperator(
+          'subtraction_equal',
+          expression,
+          right,
+          expression.location.merge(right.location)
+        )
+      } else if (
+        peekToken.type === 'symbol' &&
+        peekToken.symbol === 'asterisk_equal'
+      ) {
+        tokens.next()
+        const right = this.parseExpression5(tokens)
+
+        expression = this.makeBinaryOperator(
+          'multiplication_equal',
+          expression,
+          right,
+          expression.location.merge(right.location)
+        )
+      } else if (
+        peekToken.type === 'symbol' &&
+        peekToken.symbol === 'slash_equal'
+      ) {
+        tokens.next()
+        const right = this.parseExpression5(tokens)
+
+        expression = this.makeBinaryOperator(
+          'division_equal',
+          expression,
+          right,
+          expression.location.merge(right.location)
+        )
+      } else if (
+        peekToken.type === 'symbol' &&
+        peekToken.symbol === 'percent_equal'
+      ) {
+        tokens.next()
+        const right = this.parseExpression5(tokens)
+
+        expression = this.makeBinaryOperator(
+          'percent_equal',
+          expression,
+          right,
+          expression.location.merge(right.location)
+        )
+      } else {
+        return expression
+      }
+    }
+  }
+
+  /**
+   * Parse expression(`a==b`, `a!=b`, `a<b`, `a<=b`, `a>b`, `a>=b`).
+   * @param tokens Tokens.
+   */
+  private parseExpression4(tokens: TokenWalker) {
+    let expression = this.parseExpression3(tokens)
+
+    while (true as const) {
+      const peekToken = tokens.peek()
+
+      if (!peekToken) {
+        return expression
+      }
+
+      if (
+        peekToken.type === 'symbol' &&
+        (peekToken.symbol === 'equal_equal' ||
+          peekToken.symbol === 'exclamation_equal' ||
+          peekToken.symbol === 'less_than' ||
+          peekToken.symbol === 'less_equal_than' ||
+          peekToken.symbol === 'greeter_than' ||
+          peekToken.symbol === 'greeter_equal_than')
+      ) {
+        tokens.next()
+        const operator: BinaryOperatorType = peekToken.symbol
+
+        const right = this.parseExpression5(tokens)
+
+        expression = this.makeBinaryOperator(
+          operator,
+          expression,
+          right,
+          expression.location.merge(right.location)
+        )
+      } else {
+        return expression
+      }
+    }
+  }
+
+  /**
+   * Parse expression(`a%b`, `a+b` and `a-b`).
    * @param tokens Tokens.
    */
   private parseExpression3(tokens: TokenWalker) {
@@ -54,11 +190,17 @@ export class Parser implements IParser {
 
       if (
         peekToken.type === 'symbol' &&
-        (peekToken.symbol === 'plus' || peekToken.symbol === 'minus')
+        (peekToken.symbol === 'percent' ||
+          peekToken.symbol === 'plus' ||
+          peekToken.symbol === 'minus')
       ) {
         tokens.next()
         const operator: BinaryOperatorType =
-          peekToken.symbol === 'plus' ? 'addition' : 'subtraction'
+          peekToken.symbol === 'plus'
+            ? 'addition'
+            : peekToken.symbol === 'minus'
+            ? 'subtraction'
+            : 'percent'
 
         const right = this.parseExpression2(tokens)
 
@@ -115,7 +257,9 @@ export class Parser implements IParser {
     if (peekToken) {
       if (
         peekToken.type === 'symbol' &&
-        (peekToken.symbol === 'plus' || peekToken.symbol == 'minus')
+        (peekToken.symbol === 'plus' ||
+          peekToken.symbol == 'minus' ||
+          peekToken.symbol === 'exclamation')
       ) {
         tokens.next()
         const operator: UnaryOperatorType = peekToken.symbol
