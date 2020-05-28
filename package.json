@@ -1,9 +1,9 @@
 {
   "name": "mpl-1",
   "bin": {
-    "interpreter": "ts-node src/interpreter"
+    "interpreter": "src/interpreter.ts"
   },
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "lib/index.js",
   "author": "hota1024",
   "license": "MIT",
