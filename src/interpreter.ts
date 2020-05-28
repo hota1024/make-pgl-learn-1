@@ -6,6 +6,7 @@ import {
   LexerError,
   ParseError,
   EvaluatorReferenceError,
+  EvaluatorError,
 } from './classes'
 import { Token, AST } from './types'
 
@@ -60,7 +61,7 @@ const evaluateOrFalse = (formula: string, ast: AST) => {
   try {
     return evaluator.evaluate(ast)
   } catch (error) {
-    if (error instanceof EvaluatorReferenceError) {
+    if (error instanceof EvaluatorError) {
       const location = error.location
       console.log(formula)
       console.log(
