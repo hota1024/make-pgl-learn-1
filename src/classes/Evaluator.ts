@@ -1,4 +1,4 @@
-import { IEvaluator } from '../interfaces'
+import { IEvaluator, EvaluatorResult } from '../interfaces'
 import { AST } from '../types'
 import { EvaluatorReferenceError } from '.'
 import { EvaluatorSyntaxError } from './EvaluatorSyntaxError'
@@ -70,7 +70,7 @@ export class Evaluator implements IEvaluator {
     trunc: Math.trunc,
   }
 
-  evaluate(ast: AST): number {
+  evaluate(ast: AST): EvaluatorResult {
     return this.evaluateAST(ast)
   }
 
@@ -79,7 +79,7 @@ export class Evaluator implements IEvaluator {
    *
    * @param ast AST.
    */
-  private evaluateAST(ast: AST): number {
+  private evaluateAST(ast: AST): EvaluatorResult {
     if (ast.type === 'binary_operator') {
       if (ast.operator === 'equal') {
         if (ast.left.type === 'identifier') {
@@ -179,7 +179,11 @@ export class Evaluator implements IEvaluator {
       }
     } else if (ast.type === 'unary_operator') {
       if (ast.operator === 'minus') {
-        return this.evaluateAST(ast.node) * -1
+        const result = this.evaluateAST(ast.node)
+        if (typeof result !== 'number') {
+          throw NaN
+        }
+        return result * -1
       } else if (ast.operator === 'plus') {
         return this.evaluateAST(ast.node)
       } else if (ast.operator === 'exclamation') {

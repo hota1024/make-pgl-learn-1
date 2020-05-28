@@ -1,6 +1,11 @@
 import { AST } from '../types'
 
 /*
+ * EvaluatorResult type.
+ */
+export type EvaluatorResult = number | string
+
+/*
  * Evaluator interface.
  */
 export interface IEvaluator {
@@ -9,5 +14,5 @@ export interface IEvaluator {
    *
    * @param ast AST.
    */
-  evaluate(ast: AST): number
+  evaluate(ast: AST): EvaluatorResult
 }
